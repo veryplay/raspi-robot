@@ -1,0 +1,32 @@
+# maven target
+target/
+
+# eclipse meta
+.classpath
+.project
+.settings/
+.DS_Store
+bin/
+
+# vscode
+.vscode/
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# Log file
+*.log
+
+.idea/
+*.iml
+*.ipr
+*.iws
+
+.factorypath
+
+# python
+*.eggs/
+*.egg-info/
+dist/
+build/
+*.pyc
