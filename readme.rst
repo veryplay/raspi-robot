@@ -39,4 +39,4 @@ Usage
 Note
 ----
 
-Need to change L298N/HC-SR04's actual GPIO port in `driver.py`、`decelerator.py`、`ultrasonic.py`.
+Need to change L298N/HC-SR04's actual GPIO port in ``driver.py``、``decelerator.py``、``ultrasonic.py``.
