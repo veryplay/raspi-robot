@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import logging
 import sys
 
-try:
-    import RPi.GPIO as GPIO
-except RuntimeError:
-    import fake_rpi
-    sys.modules['RPi'] = fake_rpi.RPi
-    import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 from lifecycle import LifeCycle
+
+logger = logging.getLogger(__name__)
 
 class Decelerator(LifeCycle):
 
@@ -22,11 +20,11 @@ class Decelerator(LifeCycle):
     def do_start(self):
         self.init_gpio()
 
-        self.pwm_left = GPIO.PWM(cls.DECELERATOR_LEFT, 100)
-        self.pwm_left.start()
+        self.pwm_left = GPIO.PWM(self.DECELERATOR_LEFT, 100)
+        self.pwm_left.start(0)
         
-        self.pwm_right = GPIO.PWM(cls.DECELERATOR_RIGHT, 100)	
-        self.pwm_right.start()
+        self.pwm_right = GPIO.PWM(self.DECELERATOR_RIGHT, 100)	
+        self.pwm_right.start(0)
 
         logger.info("start completely.")
 

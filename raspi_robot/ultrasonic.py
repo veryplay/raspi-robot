@@ -5,12 +5,7 @@ import logging
 import time
 import sys
 
-try:
-    import RPi.GPIO as GPIO
-except RuntimeError:
-    import fake_rpi
-    sys.modules['RPi'] = fake_rpi.RPi
-    import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 from lifecycle import LifeCycle
 
@@ -18,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 class Ultrasonic(LifeCycle):
 
-    TRIG = 25
-    ECHO = 12
+    TRIG = 23
+    ECHO = 24
 
     ACOUSTIC_WAVE_VELOCITY = 343
 
@@ -53,8 +48,8 @@ class Ultrasonic(LifeCycle):
 
     @classmethod
     def init_gpio(cls):
-        GPIO.setup(TRIG, GPIO.OUT, initial = GPIO.LOW)
-        GPIO.setup(ECHO, GPIO.IN)
+        GPIO.setup(cls.TRIG, GPIO.OUT, initial = GPIO.LOW)
+        GPIO.setup(cls.ECHO, GPIO.IN)
     
     @classmethod
     def clean_gpio(cls):

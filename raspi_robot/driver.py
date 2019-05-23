@@ -7,12 +7,7 @@ import time
 from threading import Thread
 import sys
 
-try:
-    import RPi.GPIO as GPIO
-except RuntimeError:
-    import fake_rpi
-    sys.modules['RPi'] = fake_rpi.RPi
-    import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 from decelerator import Decelerator
 from lifecycle import LifeCycle
@@ -67,24 +62,42 @@ class Driver(LifeCycle):
     def run(self):
         while not self.should_stop():
             distance = self.ultrasonic.get_distance()
-            logger.info("distance %s", distance)
-
-            if distance > 100:
+            if distance > 50:
                 self.decelerator.change_decelerator_left(100)
                 self.decelerator.change_decelerator_right(100)
                 self.forward()
-                continue
+                logger.info("distance %d cm, robot forward.", distance)
             
-            if distance >50 and distance < 100:
+            elif distance >40 and distance < 50:
                 self.decelerator.change_decelerator_left(distance / 10 * 10)
                 self.decelerator.change_decelerator_right(distance / 10 * 10)
+                logger.info("distance %d cm, robot decelerator.", distance)
             
-            if distance < 50:
+            elif distance > 30 and distance < 40:
                 self.decelerator.change_decelerator_left(distance / 10 * 10 + 20)
                 self.decelerator.change_decelerator_right(distance / 10 * 10)
                 self.turn_right()
+                logger.info("distance %d cm, robot turn right.", distance)
 
-            time.sleep(0.1)
+            elif distance > 20 and distance < 30:
+                self.decelerator.change_decelerator_left(distance / 10 * 10)
+                self.decelerator.change_decelerator_right(distance / 10 * 10 + 20)
+                self.turn_left()
+                logger.info("distance %d cm, robot turn left.", distance)
+
+            elif distance > 10 and distance < 20:
+                self.decelerator.change_decelerator_left(20)
+                self.decelerator.change_decelerator_right(20)
+                self.backup()
+                logger.info("distance %d cm, robot backup.", distance)
+
+            else :
+                self.decelerator.change_decelerator_left(0)
+                self.decelerator.change_decelerator_right(0)
+                self.braking()
+                logger.info("distance %d cm, robot braking.", distance)
+
+            time.sleep(0.2)
 
     @classmethod
     def init_gpio(cls):
@@ -124,7 +137,7 @@ class Driver(LifeCycle):
         GPIO.output(cls.DRIVER_RIGHT_B, GPIO.LOW)
 
     @classmethod
-    def stop(cls):
+    def braking(cls):
         GPIO.output(cls.DRIVER_LEFT_A, False)
         GPIO.output(cls.DRIVER_LEFT_B, False)
         GPIO.output(cls.DRIVER_RIGHT_A, False)
