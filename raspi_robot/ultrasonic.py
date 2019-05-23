@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 class Ultrasonic(LifeCycle):
 
-    TRIG = 23
-    ECHO = 24
+    TRIG = 4
+    ECHO = 18
 
     ACOUSTIC_WAVE_VELOCITY = 343
 

@@ -40,3 +40,26 @@ Note
 ----
 
 Need to change L298N/HC-SR04's actual GPIO port in ``driver.py``、``decelerator.py``、``ultrasonic.py``.
+
+
+.. table:: L298N connection detail
+
+   =====  =======
+   L298N   GPIO
+   =====  =======
+   IN1    GPIO 05
+   IN2    GPIO 06
+   IN3    GPIO 13
+   IN4    GPIO 19
+   ENA    GPIO 23
+   ENB    GPIO 24
+   =====  =======
+
+.. table:: HC-SR04 connection detail
+
+   =====  =======
+   L298N   GPIO
+   =====  =======
+   TRIG   GPIO 4
+   ECHO   GPIO 18
+   =====  =======
