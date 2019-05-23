@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import pandas
+import Queue
+from Queue import Empty
 import signal
 import time
 from threading import Thread
 import sys
-
 import RPi.GPIO as GPIO
 
 from decelerator import Decelerator
@@ -17,6 +19,8 @@ logger = logging.getLogger(__name__)
 
 class Driver(LifeCycle):
 
+    CACHE_LENGTH = 10
+
     DRIVER_LEFT_A = 5
     DRIVER_LEFT_B = 6
     DRIVER_RIGHT_A = 13
@@ -26,6 +30,9 @@ class Driver(LifeCycle):
         super(Driver, self).__init__()
 
     def do_start(self):
+        self.queue = Queue.Queue(self.CACHE_LENGTH)
+        self.cache = []
+
         self._bind_signal()
         
         self.init_gpio()
@@ -33,7 +40,7 @@ class Driver(LifeCycle):
         self.decelerator = Decelerator()
         self.decelerator.start()
 
-        self.ultrasonic = Ultrasonic()
+        self.ultrasonic = Ultrasonic(self)
         self.ultrasonic.start()
 
         self.cd_thread = Thread(name = "DriverThread", target = self.run)
@@ -43,61 +50,81 @@ class Driver(LifeCycle):
     
     def do_stop(self):
         self._unbind_signal()
+        
+        if self.ultrasonic:
+            self.ultrasonic.stop()
 
-        if (hasattr(self, "cd_thread") 
+        while (hasattr(self, "cd_thread") 
             and self.cd_thread 
             and self.cd_thread.isAlive()):
-            self.cd_thread.join(2)
+            self.cd_thread.join(1)
+            logger.warn("wait %s to finish.", self.cd_thread.getName())
 
         if self.decelerator:
             self.decelerator.stop()
 
-        if self.ultrasonic:
-            self.ultrasonic.stop()
-
         self.clean_gpio()
 
+        with self.queue.mutex:
+            self.queue.queue.clear()
         logger.info("stop completely.")
 
     def run(self):
         while not self.should_stop():
-            distance = self.ultrasonic.get_distance()
-            if distance > 50:
-                self.decelerator.change_decelerator_left(100)
-                self.decelerator.change_decelerator_right(100)
-                self.forward()
-                logger.info("distance %d cm, robot forward.", distance)
-            
-            elif distance >40 and distance < 50:
-                self.decelerator.change_decelerator_left(distance / 10 * 10)
-                self.decelerator.change_decelerator_right(distance / 10 * 10)
-                logger.info("distance %d cm, robot decelerator.", distance)
-            
-            elif distance > 30 and distance < 40:
-                self.decelerator.change_decelerator_left(distance / 10 * 10 + 20)
-                self.decelerator.change_decelerator_right(distance / 10 * 10)
-                self.turn_right()
-                logger.info("distance %d cm, robot turn right.", distance)
+            try:
+                distance = self.queue.get(block = True, timeout = 0.01)
 
-            elif distance > 20 and distance < 30:
-                self.decelerator.change_decelerator_left(distance / 10 * 10)
-                self.decelerator.change_decelerator_right(distance / 10 * 10 + 20)
-                self.turn_left()
-                logger.info("distance %d cm, robot turn left.", distance)
+                cache_count = self.cache.count
+                if cache_count >= self.CACHE_LENGTH:
+                    self.cache.pop(index = 0)
+                    self.cache.append(distance)
 
-            elif distance > 10 and distance < 20:
-                self.decelerator.change_decelerator_left(20)
-                self.decelerator.change_decelerator_right(20)
-                self.backup()
-                logger.info("distance %d cm, robot backup.", distance)
+                else cache_count >= 0 and cache_count <= self.CACHE_LENGTH:
+                    self.cache.append(distance)
 
-            else :
-                self.decelerator.change_decelerator_left(0)
-                self.decelerator.change_decelerator_right(0)
-                self.braking()
-                logger.info("distance %d cm, robot braking.", distance)
+                cache_describe = pandas.Series(self.cache).describe()
+                mean = cache_describe["mean"]
+                std = cache_describe["std"]
+                if abs(distance - mean) > 3 * std:
+                    continue
 
-            time.sleep(0.2)
+                if distance > 70:
+                    self.decelerator.change_decelerator_left(100)
+                    self.decelerator.change_decelerator_right(100)
+                    self.forward()
+                    logger.info("distance %d cm, robot forward.", distance)
+                
+                elif distance > 40 and distance <= 70:
+                    self.decelerator.change_decelerator_left(distance / 10 * 10 + 20)
+                    self.decelerator.change_decelerator_right(distance / 10 * 10)
+                    self.turn_right()
+                    logger.info("distance %d cm, robot turn right.", distance)
+
+                elif distance > 10 and distance <= 40:
+                    self.decelerator.change_decelerator_left(distance / 10 * 10)
+                    self.decelerator.change_decelerator_right(distance / 10 * 10 + 20)
+                    self.turn_left()
+                    logger.info("distance %d cm, robot turn left.", distance)
+
+                elif distance > 0 and distance <= 10:
+                    self.decelerator.change_decelerator_left(20)
+                    self.decelerator.change_decelerator_right(20)
+                    self.backup()
+                    logger.info("distance %d cm, robot backup.", distance)
+
+                else :
+                    self.decelerator.change_decelerator_left(0)
+                    self.decelerator.change_decelerator_right(0)
+                    self.braking()
+                    logger.info("distance %d cm, robot braking.", distance)
+                
+            except Queue.Empty:
+                continue
+            except Exception:
+                logger.error("DriverThread run failed.", exc_info=1)
+
+    def get_queue(self):
+        return self.queue
 
     @classmethod
     def init_gpio(cls):

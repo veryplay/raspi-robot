@@ -19,6 +19,7 @@ VERSION = None
 INSTALL_REQUIRED = [
     "clint==0.5.1",
     "mock==2.0.0"
+    "pandas=0.24.2"
 ]
 
 DEPENDENCY_LINKS = [
