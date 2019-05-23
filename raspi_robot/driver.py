@@ -8,7 +8,6 @@ from Queue import Empty
 import signal
 import time
 from threading import Thread
-import sys
 import RPi.GPIO as GPIO
 
 from decelerator import Decelerator

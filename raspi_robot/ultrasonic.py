@@ -4,7 +4,6 @@
 import logging
 import Queue
 import time
-import sys
 import RPi.GPIO as GPIO
 from threading import Thread
 
