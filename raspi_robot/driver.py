@@ -83,7 +83,7 @@ class Driver(LifeCycle):
                 cache_describe = pandas.Series(self.cache).describe()
                 mean = cache_describe["mean"]
                 std = cache_describe["std"]
-                if abs(distance - mean) > 3 * std:
+                if abs(distance - mean) > 2 * std:
                     logger.warn("distance is invalid.")
                     continue
 
@@ -93,19 +93,19 @@ class Driver(LifeCycle):
                     self.forward()
                     logger.info("distance %d cm, robot forward.", distance)
                 
-                elif distance > 40 and distance <= 70:
+                elif distance > 20 and distance <= 70:
                     self.decelerator.change_decelerator_left(distance / 10 * 10 + 20)
                     self.decelerator.change_decelerator_right(distance / 10 * 10)
                     self.turn_right()
                     logger.info("distance %d cm, robot turn right.", distance)
 
-                elif distance > 10 and distance <= 40:
+                elif distance > 10 and distance <= 20:
                     self.decelerator.change_decelerator_left(distance / 10 * 10)
                     self.decelerator.change_decelerator_right(distance / 10 * 10 + 20)
                     self.turn_left()
                     logger.info("distance %d cm, robot turn left.", distance)
 
-                elif distance > 0 and distance <= 10:
+                elif distance > 0 and distance <= 5:
                     self.decelerator.change_decelerator_left(20)
                     self.decelerator.change_decelerator_right(20)
                     self.backup()
