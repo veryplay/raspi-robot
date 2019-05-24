@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 class Ultrasonic(LifeCycle):
 
-    TRIG = 4
-    ECHO = 18
+    TRIG = 23
+    ECHO = 24
 
     ACOUSTIC_WAVE_VELOCITY = 343
 
@@ -45,7 +45,8 @@ class Ultrasonic(LifeCycle):
         while not self.should_stop():
             try:
                 distance = self.get_distance()
-                self.queue.put_nowait(distance)
+                logger.info("distance is %d", distance)
+                self.queue.put(distance)
             except Queue.Full:
                 logger.warn("Distance Queue is full, wait Driver to consume it.")
             except Exception:

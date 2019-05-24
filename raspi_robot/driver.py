@@ -64,8 +64,7 @@ class Driver(LifeCycle):
 
         self.clean_gpio()
 
-        with self.queue.mutex:
-            self.queue.queue.clear()
+        self.queue.queue.clear()
         logger.info("stop completely.")
 
     def run(self):
@@ -73,18 +72,19 @@ class Driver(LifeCycle):
             try:
                 distance = self.queue.get(block = True, timeout = 0.01)
 
-                cache_count = self.cache.count
+                cache_count = len(self.cache)
                 if cache_count >= self.CACHE_LENGTH:
-                    self.cache.pop(index = 0)
+                    self.cache.pop(0)
                     self.cache.append(distance)
 
-                else cache_count >= 0 and cache_count <= self.CACHE_LENGTH:
+                else:
                     self.cache.append(distance)
 
                 cache_describe = pandas.Series(self.cache).describe()
                 mean = cache_describe["mean"]
                 std = cache_describe["std"]
                 if abs(distance - mean) > 3 * std:
+                    logger.warn("distance is invalid.")
                     continue
 
                 if distance > 70:
