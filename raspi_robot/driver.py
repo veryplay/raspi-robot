@@ -23,7 +23,7 @@ class Driver(LifeCycle):
     DRIVER_LEFT_A = 5
     DRIVER_LEFT_B = 6
     DRIVER_RIGHT_A = 13
-    DRIVER_RIGHT_B = 19
+    DRIVER_RIGHT_B = 26
 
     def __init__(self):
         super(Driver, self).__init__()

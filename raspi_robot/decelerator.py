@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 class Decelerator(LifeCycle):
 
-    DECELERATOR_LEFT = 17
-    DECELERATOR_RIGHT = 18
+    DECELERATOR_LEFT = 18
+    DECELERATOR_RIGHT = 19
 
     def __init__(self):
         super(Decelerator, self).__init__()
