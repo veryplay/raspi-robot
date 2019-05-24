@@ -17,10 +17,15 @@ Raspi Robot
 Raspi Robot is a simple python program for raspberry 3B, include Motor Shield(L298N), Ultrasonic Sensor(HC-SR04) component.
 
 
+Motor Shield(L298N) Interface
+-----------------------------
+
+.. image:: ./docs/L298N.png
+
 Connection Detail of Motor Shield(L298N)
 ----------------------------------------
 
-.. image:: ./docs/L298N.png
+.. image:: ./docs/L298N_AND_RASPI.png
 
 
 Connection Detail of Ultrasonic Sensor(HC-SR04)
