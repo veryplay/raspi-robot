@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import pandas
+from pandas import Series
 import Queue
 from Queue import Empty
 import signal
@@ -80,7 +80,7 @@ class Driver(LifeCycle):
                 else:
                     self.cache.append(distance)
 
-                cache_describe = pandas.Series(self.cache).describe()
+                cache_describe = Series(self.cache).describe()
                 mean = cache_describe["mean"]
                 std = cache_describe["std"]
                 if abs(distance - mean) > 2 * std:
@@ -93,21 +93,21 @@ class Driver(LifeCycle):
                     self.forward()
                     logger.info("distance %d cm, robot forward.", distance)
                 
-                elif distance > 20 and distance <= 70:
+                elif distance > 30 and distance <= 70:
                     self.decelerator.change_decelerator_left(distance / 10 * 10 + 20)
                     self.decelerator.change_decelerator_right(distance / 10 * 10)
                     self.turn_right()
                     logger.info("distance %d cm, robot turn right.", distance)
 
-                elif distance > 10 and distance <= 20:
-                    self.decelerator.change_decelerator_left(distance / 10 * 10)
-                    self.decelerator.change_decelerator_right(distance / 10 * 10 + 20)
+                elif distance > 20 and distance <= 30:
+                    self.decelerator.change_decelerator_left(distance / 10 * 10 + 10)
+                    self.decelerator.change_decelerator_right(distance / 10 * 10 + 30)
                     self.turn_left()
                     logger.info("distance %d cm, robot turn left.", distance)
 
-                elif distance > 0 and distance <= 5:
-                    self.decelerator.change_decelerator_left(20)
-                    self.decelerator.change_decelerator_right(20)
+                elif distance > 5 and distance <= 20:
+                    self.decelerator.change_decelerator_left(40)
+                    self.decelerator.change_decelerator_right(40)
                     self.backup()
                     logger.info("distance %d cm, robot backup.", distance)
 

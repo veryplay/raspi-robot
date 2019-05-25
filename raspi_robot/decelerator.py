@@ -19,10 +19,10 @@ class Decelerator(LifeCycle):
     def do_start(self):
         self.init_gpio()
 
-        self.pwm_left = GPIO.PWM(self.DECELERATOR_LEFT, 100)
+        self.pwm_left = GPIO.PWM(self.DECELERATOR_LEFT, 30)
         self.pwm_left.start(0)
         
-        self.pwm_right = GPIO.PWM(self.DECELERATOR_RIGHT, 100)	
+        self.pwm_right = GPIO.PWM(self.DECELERATOR_RIGHT, 30)	
         self.pwm_right.start(0)
 
         logger.info("start completely.")

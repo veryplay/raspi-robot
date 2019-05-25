@@ -46,7 +46,7 @@ class Ultrasonic(LifeCycle):
             try:
                 distance = self.get_distance()
                 logger.info("distance is %d", distance)
-                self.queue.put(distance)
+                self.queue.put(distance, block = True, timeout = 0.1)
             except Queue.Full:
                 logger.warn("Distance Queue is full, wait Driver to consume it.")
             except Exception:
