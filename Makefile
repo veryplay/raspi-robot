@@ -5,9 +5,7 @@ help:
 	@echo "clean-build - remove build artifacts"
 	@echo "clean-pyc - remove Python file artifacts"
 	@echo "clean-test - remove test and coverage artifacts"
-	@echo "lint - check style with flake8"
 	@echo "test - run tests quickly with the default Python"
-	@echo "test-all - run tests on every Python version with tox"
 	@echo "install - install the package to the active Python's site-packages"
 	@echo "develop - build the package to the develop Python's site-packages"
 
@@ -28,18 +26,11 @@ clean-pyc:
 	find . -name '__pycache__' -exec rm -fr {} +
 
 clean-test:
-	rm -fr .tox/
 	rm -f .coverage
 	rm -fr htmlcov/
 
-lint:
-	flake8 leviathan_serving tests
-
 test:
 	python setup.py test
-
-test-all:
-	tox
 
 install: clean
 	python setup.py install
