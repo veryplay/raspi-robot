@@ -56,6 +56,7 @@ Need to change L298N/HC-SR04's actual GPIO port in ``driver.py``、``decelerator
    IN2    GPIO 06
    IN3    GPIO 13
    IN4    GPIO 26
+   =====  =======
    ENA    GPIO 18
    ENB    GPIO 19
    =====  =======
@@ -65,6 +66,8 @@ Need to change L298N/HC-SR04's actual GPIO port in ``driver.py``、``decelerator
    =====  =======
    L298N   GPIO
    =====  =======
+    VCC   GPIO 5V
    TRIG   GPIO 23
    ECHO   GPIO 24
+    GND   GPIO GND
    =====  =======
