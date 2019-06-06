@@ -17,20 +17,21 @@ from vision import Vision
 
 logger = logging.getLogger(__name__)
 
+CACHE_LENGTH = 10
+
+DRIVER_LEFT_A = 5
+DRIVER_LEFT_B = 6
+DRIVER_RIGHT_A = 13
+DRIVER_RIGHT_B = 26
+    
 class Driver(LifeCycle):
 
-    CACHE_LENGTH = 10
-
-    DRIVER_LEFT_A = 5
-    DRIVER_LEFT_B = 6
-    DRIVER_RIGHT_A = 13
-    DRIVER_RIGHT_B = 26
 
     def __init__(self):
         super(Driver, self).__init__()
 
     def do_start(self):
-        self.queue = Queue.Queue(self.CACHE_LENGTH)
+        self.queue = Queue.Queue(CACHE_LENGTH)
         self.cache = []
 
         self._bind_signal()
@@ -82,12 +83,14 @@ class Driver(LifeCycle):
                 delta = end_time - begin_time
                 if delta > 30:
                     self.vision.trigger_vision_event()
+                    self.braking()
+                    time.sleep(10)
                     begin_time = end_time
 
                 distance = self.queue.get(block = True, timeout = 0.01)
 
                 cache_count = len(self.cache)
-                if cache_count >= self.CACHE_LENGTH:
+                if cache_count >= CACHE_LENGTH:
                     self.cache.pop(0)
                     self.cache.append(distance)
 
@@ -102,35 +105,20 @@ class Driver(LifeCycle):
                     continue
 
                 if distance > 70:
-                    self.decelerator.change_decelerator_left(100)
-                    self.decelerator.change_decelerator_right(100)
                     self.forward()
                     logger.info("distance %d cm, robot forward.", distance)
-                
                 elif distance > 30 and distance <= 70:
-                    self.decelerator.change_decelerator_left(30)
-                    self.decelerator.change_decelerator_right(20)
                     self.turn_right()
                     logger.info("distance %d cm, robot turn right.", distance)
-
                 elif distance > 20 and distance <= 30:
-                    self.decelerator.change_decelerator_left(20)
-                    self.decelerator.change_decelerator_right(30)
                     self.turn_left()
                     logger.info("distance %d cm, robot turn left.", distance)
-
                 elif distance > 5 and distance <= 20:
-                    self.decelerator.change_decelerator_left(40)
-                    self.decelerator.change_decelerator_right(40)
                     self.backup()
                     logger.info("distance %d cm, robot backup.", distance)
-
                 else :
-                    self.decelerator.change_decelerator_left(0)
-                    self.decelerator.change_decelerator_right(0)
                     self.braking()
                     logger.info("distance %d cm, robot braking.", distance)
-                
             except Queue.Empty:
                 continue
             except Exception:
@@ -139,49 +127,52 @@ class Driver(LifeCycle):
     def get_queue(self):
         return self.queue
 
-    @classmethod
-    def init_gpio(cls):
+    def init_gpio(self):
         GPIO.setmode(GPIO.BCM)
-        GPIO.setup([cls.DRIVER_LEFT_A, cls.DRIVER_LEFT_B, cls.DRIVER_RIGHT_A, cls.DRIVER_RIGHT_B], GPIO.OUT)
+        GPIO.setup([DRIVER_LEFT_A, DRIVER_LEFT_B, DRIVER_RIGHT_A, DRIVER_RIGHT_B], GPIO.OUT)
 
-    @classmethod
-    def clean_gpio(cls):
-        GPIO.cleanup([cls.DRIVER_LEFT_A, cls.DRIVER_LEFT_B, cls.DRIVER_RIGHT_A, cls.DRIVER_RIGHT_B])
+    def clean_gpio(self):
+        GPIO.cleanup([DRIVER_LEFT_A, DRIVER_LEFT_B, DRIVER_RIGHT_A, DRIVER_RIGHT_B])
 
-    @classmethod
-    def forward(cls):
-        GPIO.output(cls.DRIVER_LEFT_A,  GPIO.HIGH)
-        GPIO.output(cls.DRIVER_LEFT_B,  GPIO.LOW)
-        GPIO.output(cls.DRIVER_RIGHT_A,  GPIO.HIGH)
-        GPIO.output(cls.DRIVER_RIGHT_B,  GPIO.LOW)
+    def forward(self):
+        self.decelerator.change_decelerator_left(100)
+        self.decelerator.change_decelerator_right(100)
+        GPIO.output(DRIVER_LEFT_A,  GPIO.HIGH)
+        GPIO.output(DRIVER_LEFT_B,  GPIO.LOW)
+        GPIO.output(DRIVER_RIGHT_A,  GPIO.HIGH)
+        GPIO.output(DRIVER_RIGHT_B,  GPIO.LOW)
 
-    @classmethod
-    def backup(cls):
-        GPIO.output(cls.DRIVER_LEFT_A, GPIO.LOW)
-        GPIO.output(cls.DRIVER_LEFT_B, GPIO.HIGH)
-        GPIO.output(cls.DRIVER_RIGHT_A, GPIO.LOW)
-        GPIO.output(cls.DRIVER_RIGHT_B, GPIO.HIGH)
+    def backup(self):
+        self.decelerator.change_decelerator_left(40)
+        self.decelerator.change_decelerator_right(40)        
+        GPIO.output(DRIVER_LEFT_A, GPIO.LOW)
+        GPIO.output(DRIVER_LEFT_B, GPIO.HIGH)
+        GPIO.output(DRIVER_RIGHT_A, GPIO.LOW)
+        GPIO.output(DRIVER_RIGHT_B, GPIO.HIGH)
 
-    @classmethod
-    def turn_left(cls):
-        GPIO.output(cls.DRIVER_LEFT_A, GPIO.HIGH)
-        GPIO.output(cls.DRIVER_LEFT_B, GPIO.LOW)
-        GPIO.output(cls.DRIVER_RIGHT_A, GPIO.LOW)
-        GPIO.output(cls.DRIVER_RIGHT_B, GPIO.HIGH)
+    def turn_left(self):
+        self.decelerator.change_decelerator_left(20)
+        self.decelerator.change_decelerator_right(30)
+        GPIO.output(DRIVER_LEFT_A, GPIO.HIGH)
+        GPIO.output(DRIVER_LEFT_B, GPIO.LOW)
+        GPIO.output(DRIVER_RIGHT_A, GPIO.LOW)
+        GPIO.output(DRIVER_RIGHT_B, GPIO.HIGH)
     
-    @classmethod
-    def turn_right(cls):
-        GPIO.output(cls.DRIVER_LEFT_A, GPIO.LOW)
-        GPIO.output(cls.DRIVER_LEFT_B, GPIO.HIGH)
-        GPIO.output(cls.DRIVER_RIGHT_A, GPIO.HIGH)
-        GPIO.output(cls.DRIVER_RIGHT_B, GPIO.LOW)
+    def turn_right(self):
+        self.decelerator.change_decelerator_left(30)
+        self.decelerator.change_decelerator_right(20)
+        GPIO.output(DRIVER_LEFT_A, GPIO.LOW)
+        GPIO.output(DRIVER_LEFT_B, GPIO.HIGH)
+        GPIO.output(DRIVER_RIGHT_A, GPIO.HIGH)
+        GPIO.output(DRIVER_RIGHT_B, GPIO.LOW)
 
-    @classmethod
-    def braking(cls):
-        GPIO.output(cls.DRIVER_LEFT_A, False)
-        GPIO.output(cls.DRIVER_LEFT_B, False)
-        GPIO.output(cls.DRIVER_RIGHT_A, False)
-        GPIO.output(cls.DRIVER_RIGHT_B, False)
+    def braking(self):
+        self.decelerator.change_decelerator_left(0)
+        self.decelerator.change_decelerator_right(0)
+        GPIO.output(DRIVER_LEFT_A, False)
+        GPIO.output(DRIVER_LEFT_B, False)
+        GPIO.output(DRIVER_RIGHT_A, False)
+        GPIO.output(DRIVER_RIGHT_B, False)
 
     def _bind_signal(self):
         # bind signal

@@ -68,7 +68,7 @@ class Vision(LifeCycle):
         self.camera.start_preview()
         video_filename = self.generate_video_filename()
         self.camera.start_recording('/home/pi/%s' % video_filename)
-        time.sleep(5)
+        time.sleep(10)
         self.camera.stop_recording()
         self.camera.stop_preview()
 
