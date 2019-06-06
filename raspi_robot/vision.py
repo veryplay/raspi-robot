@@ -45,7 +45,7 @@ class Vision(LifeCycle):
             try:
                 anything = self.queue.get(block = True, timeout = 0.01)
                 if anything:
-                    self.capture()
+                    self.record()
             except Queue.Empty:
                 continue
             except Exception:
