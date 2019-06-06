@@ -82,9 +82,8 @@ class Driver(LifeCycle):
                 end_time = int(time.time())
                 delta = end_time - begin_time
                 if delta > 30:
-                    self.vision.trigger_vision_event()
                     self.braking()
-                    time.sleep(10)
+                    self.vision.record()
                     begin_time = end_time
 
                 distance = self.queue.get(block = True, timeout = 0.01)
