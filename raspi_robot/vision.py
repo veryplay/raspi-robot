@@ -64,8 +64,22 @@ class Vision(LifeCycle):
         self.camera.capture('/home/pi/%s' % picture_filename)
         self.camera.stop_preview()
 
+    def record(self):
+        self.camera.start_preview()
+        video_filename = self.generate_video_filename()
+        self.camera.start_recording('/home/pi/%s' % video_filename)
+        time.sleep(5)
+        self.camera.stop_recording()
+        self.camera.stop_preview()
+
     def generate_picture_filename(self):
         d = datetime.now()
         ds = d.strftime(DEFAULR_DATE_FORMAT)
         dm = int(time.time() * 1000)
         return "%s_%d.jpg" % (ds, dm)
+
+    def generate_video_filename(self):
+        d = datetime.now()
+        ds = d.strftime(DEFAULR_DATE_FORMAT)
+        dm = int(time.time() * 1000)
+        return "%s_%d.h264" % (ds, dm)
