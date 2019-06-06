@@ -108,14 +108,14 @@ class Driver(LifeCycle):
                     logger.info("distance %d cm, robot forward.", distance)
                 
                 elif distance > 30 and distance <= 70:
-                    self.decelerator.change_decelerator_left(distance / 10 * 10)
-                    self.decelerator.change_decelerator_right(distance / 10 * 10 - 10)
+                    self.decelerator.change_decelerator_left(30)
+                    self.decelerator.change_decelerator_right(20)
                     self.turn_right()
                     logger.info("distance %d cm, robot turn right.", distance)
 
                 elif distance > 20 and distance <= 30:
-                    self.decelerator.change_decelerator_left(distance / 10 * 10 - 10)
-                    self.decelerator.change_decelerator_right(distance / 10 * 10)
+                    self.decelerator.change_decelerator_left(20)
+                    self.decelerator.change_decelerator_right(30)
                     self.turn_left()
                     logger.info("distance %d cm, robot turn left.", distance)
 
