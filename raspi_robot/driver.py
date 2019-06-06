@@ -151,16 +151,16 @@ class Driver(LifeCycle):
         GPIO.output(DRIVER_RIGHT_B, GPIO.HIGH)
 
     def turn_left(self):
-        self.decelerator.change_decelerator_left(20)
-        self.decelerator.change_decelerator_right(30)
+        self.decelerator.change_decelerator_left(30)
+        self.decelerator.change_decelerator_right(40)
         GPIO.output(DRIVER_LEFT_A, GPIO.HIGH)
         GPIO.output(DRIVER_LEFT_B, GPIO.LOW)
         GPIO.output(DRIVER_RIGHT_A, GPIO.LOW)
         GPIO.output(DRIVER_RIGHT_B, GPIO.HIGH)
     
     def turn_right(self):
-        self.decelerator.change_decelerator_left(30)
-        self.decelerator.change_decelerator_right(20)
+        self.decelerator.change_decelerator_left(40)
+        self.decelerator.change_decelerator_right(30)
         GPIO.output(DRIVER_LEFT_A, GPIO.LOW)
         GPIO.output(DRIVER_LEFT_B, GPIO.HIGH)
         GPIO.output(DRIVER_RIGHT_A, GPIO.HIGH)
