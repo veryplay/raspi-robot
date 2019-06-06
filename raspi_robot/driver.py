@@ -13,6 +13,7 @@ import RPi.GPIO as GPIO
 from decelerator import Decelerator
 from lifecycle import LifeCycle
 from ultrasonic import Ultrasonic
+from vision import Vision
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,9 @@ class Driver(LifeCycle):
         self.ultrasonic = Ultrasonic(self)
         self.ultrasonic.start()
 
+        self.vision = Vision()
+        self.vision.start()
+
         self.cd_thread = Thread(name = "DriverThread", target = self.run)
         self.cd_thread.start()
 
@@ -62,14 +66,24 @@ class Driver(LifeCycle):
         if self.decelerator:
             self.decelerator.stop()
 
+        if self.vision:
+            self.vision.stop()
+
         self.clean_gpio()
 
         self.queue.queue.clear()
         logger.info("stop completely.")
 
     def run(self):
+        begin_time = int(time.time())
         while not self.should_stop():
             try:
+                end_time = int(time.time())
+                delta = end_time - begin_time
+                if delta > 30:
+                    self.vision.trigger_vision_event()
+                    begin_time = end_time
+
                 distance = self.queue.get(block = True, timeout = 0.01)
 
                 cache_count = len(self.cache)
@@ -94,14 +108,14 @@ class Driver(LifeCycle):
                     logger.info("distance %d cm, robot forward.", distance)
                 
                 elif distance > 30 and distance <= 70:
-                    self.decelerator.change_decelerator_left(distance / 10 * 10 + 20)
-                    self.decelerator.change_decelerator_right(distance / 10 * 10)
+                    self.decelerator.change_decelerator_left(distance / 10 * 10)
+                    self.decelerator.change_decelerator_right(distance / 10 * 10 - 10)
                     self.turn_right()
                     logger.info("distance %d cm, robot turn right.", distance)
 
                 elif distance > 20 and distance <= 30:
-                    self.decelerator.change_decelerator_left(distance / 10 * 10 + 10)
-                    self.decelerator.change_decelerator_right(distance / 10 * 10 + 30)
+                    self.decelerator.change_decelerator_left(distance / 10 * 10 - 10)
+                    self.decelerator.change_decelerator_right(distance / 10 * 10)
                     self.turn_left()
                     logger.info("distance %d cm, robot turn left.", distance)
 
