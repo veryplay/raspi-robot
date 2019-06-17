@@ -20,7 +20,7 @@ Raspi Robot is a simple python program for raspberry 3B, include Motor Shield(L2
 Motor Shield(L298N) Interface
 -----------------------------
 
-.. image:: ./docs/L298N.png
+.. image:: ./docs/L298N.jpg
 
 Connection Detail of Motor Shield(L298N)
 ----------------------------------------
@@ -40,6 +40,18 @@ Usage
 .. code:: bash
 
     python raspi_robot/robot.py
+
+Install
+
+.. code:: bash
+
+    make install
+
+Run
+
+.. code:: bash
+
+    raspi-robot
 
 Note
 ----
